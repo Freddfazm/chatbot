@@ -1,0 +1,19 @@
+# Confluence + environment
+atlassian-python-api
+python-dotenv
+requests
+
+# Embeddings / LLM
+openai
+tiktoken
+
+# Data manipulation
+pandas
+numpy
+
+# Vector database
+chromadb
+
+# API + server
+fastapi
+uvicorn
