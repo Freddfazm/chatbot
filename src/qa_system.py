@@ -1,7 +1,7 @@
+import os
 import openai
 from chromadb.utils import embedding_functions
 import chromadb
-
 class QASystem:
     def __init__(self):
         self.chroma_client = chromadb.Client()
@@ -9,11 +9,10 @@ class QASystem:
             api_key=os.getenv('OPENAI_API_KEY'),
             model_name="text-embedding-ada-002"
         )
-        self.collection = self.chroma_client.get_collection(
+        self.collection = self.chroma_client.get_or_create_collection(
             name="confluence_kb",
             embedding_function=self.openai_ef
         )
-
     def get_answer(self, question, n_results=3):
         # Query the vector database
         results = self.collection.query(

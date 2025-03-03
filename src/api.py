@@ -1,6 +1,11 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
+from src.qa_system import QASystem  # Import the class, not an object
+# Create an instance of the QASystem class
 
 app = FastAPI()
+qa_system = QASystem()
+
 
 @app.get("/")
 def read_root():
