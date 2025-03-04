@@ -23,6 +23,10 @@ class QASystem:
             model_name="text-embedding-ada-002"
         )
         
+        # Set the model to use
+        self.model = "gpt-4-turbo"  # Using latest model
+        print(f"Using model: {self.model}")  # Debug print
+        
         # Get the collection
         try:
             self.collection = self.chroma_client.get_collection(
@@ -40,7 +44,7 @@ class QASystem:
             )
             print("Created new collection")
 
-    def get_answer(self, question, n_results=3):
+    def get_answer(self, question, n_results=5):  # Increased from 3 to 5 results
         # Check if collection has any documents
         doc_count = self.collection.count()
         print(f"Collection has {doc_count} documents")  # Debug print
@@ -70,22 +74,28 @@ class QASystem:
         # Prepare context from relevant chunks
         context = "\n".join(results['documents'][0])
         
-        # Create prompt for GPT
-        prompt = f"""Based on the following context, answer the question. 
-        If the answer cannot be found in the context, say "I don't have enough information to answer that."
+        # DEBUG: Print first 500 chars of context
+        print(f"Context preview: {context[:500]}...")
+        
+        # Create prompt for GPT - modified to be more flexible
+        prompt = f"""Answer the following question based on the provided context information. 
+        Try to be helpful even if the information is not completely explicit in the context.
+        If the context provides ANY relevant information that might help answer the question, use it.
+        If you truly don't have ANY information related to the question, say "I don't have specific information about that topic."
         
         Context:
         {context}
         
         Question: {question}"""
 
-        # Get response from GPT using the new API format
+        # Get response from GPT using the new API format with the latest model
         response = self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=self.model,
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that answers questions based on the provided context."},
+                {"role": "system", "content": "You are a helpful assistant that answers questions based on the provided context. Extract as much relevant information as possible from the context to provide detailed, accurate answers."},
                 {"role": "user", "content": prompt}
-            ]
+            ],
+            temperature=0.3  # Lower temperature for more focused answers
         )
 
         return {
