@@ -324,17 +324,21 @@
             const textContainer = document.createElement('div');
             textContainer.className = 'message-text';
             
-            // Format numbered lists for better readability
+            // Format text for better readability
             if (sender === 'bot') {
-                // Apply formatting to numbered lists
                 let formattedText = text;
                 
-                // Convert numbered lists (e.g., "1. Step one") to proper HTML lists
-                formattedText = formattedText.replace(/(\d+\.\s+\*\*.*?\*\*:.*?)(?=\d+\.|$)/gs, '<li>$1</li>');
-                
-                // If we found and replaced list items, wrap them in a proper ordered list
-                if (formattedText.includes('<li>')) {
-                    formattedText = '<ol class="steps-list">' + formattedText + '</ol>';
+                // Check if text contains numbered steps
+                if (/\d+\.\s+/.test(formattedText)) {
+                    // Add spans around step numbers for better styling without creating an ordered list
+                    formattedText = formattedText.replace(/(\d+)\.(\s+)(\*\*[^:]+:\*\*|[^:]+:)/g, 
+                        '<div class="step-item"><span class="step-number">$1.</span>$2<span class="step-title">$3</span>');
+                    
+                    // Close the step-item divs
+                    formattedText = formattedText.replace(/(?=\d+\.\s+|$)/g, '</div>');
+                    
+                    // Wrap in a container
+                    formattedText = '<div class="steps-container">' + formattedText + '</div>';
                 }
                 
                 // Convert markdown-style bold (**text**) to HTML bold
@@ -377,7 +381,7 @@
                         try {
                             const urlObj = new URL(url);
                             const displayText = urlObj.hostname + urlObj.pathname.substring(0, 15) + 
-                                               (urlObj.pathname.length > 15 ? '...' : '');
+                                          (urlObj.pathname.length > 15 ? '...' : '');
                             link.textContent = displayText;
                         } catch (e) {
                             link.textContent = url.substring(0, 30) + (url.length > 30 ? '...' : '');
@@ -392,8 +396,7 @@
             
             messages.appendChild(messageDiv);
             scrollToBottom();
-        }
-        
+        }        
         function scrollToBottom() {
             const messages = document.getElementById('messages');
             messages.scrollTop = messages.scrollHeight;
