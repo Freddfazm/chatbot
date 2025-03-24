@@ -303,7 +303,7 @@
                 }
 
                 const result = await response.json();
-                addMessage(result.answer, 'bot');
+                addMessage(result.answer, 'bot', result.sources);
             } catch (error) {
                 console.error("Error:", error);
                 
@@ -315,19 +315,80 @@
             }
         }
 
-        function addMessage(text, sender) {
+        function addMessage(text, sender, sources = null) {
             const messages = document.getElementById('messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}-message`;
             
-            // Add the message text
-            messageDiv.textContent = text;
+            // Create a container for the formatted message text
+            const textContainer = document.createElement('div');
+            textContainer.className = 'message-text';
+            
+            // Format numbered lists for better readability
+            if (sender === 'bot') {
+                // Apply formatting to numbered lists
+                let formattedText = text;
+                
+                // Convert numbered lists (e.g., "1. Step one") to proper HTML lists
+                formattedText = formattedText.replace(/(\d+\.\s+\*\*.*?\*\*:.*?)(?=\d+\.|$)/gs, '<li>$1</li>');
+                
+                // If we found and replaced list items, wrap them in a proper ordered list
+                if (formattedText.includes('<li>')) {
+                    formattedText = '<ol class="steps-list">' + formattedText + '</ol>';
+                }
+                
+                // Convert markdown-style bold (**text**) to HTML bold
+                formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                // Set the formatted HTML
+                textContainer.innerHTML = formattedText;
+            } else {
+                // For user messages, keep using textContent for security
+                textContainer.textContent = text;
+            }
+            
+            messageDiv.appendChild(textContainer);
             
             // Add timestamp
             const timestamp = document.createElement('div');
             timestamp.className = 'timestamp';
             timestamp.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             messageDiv.appendChild(timestamp);
+            
+            // Add sources if available (only for bot messages)
+            if (sender === 'bot' && sources && sources.length > 0) {
+                // Add sources section
+                const sourcesDiv = document.createElement('div');
+                sourcesDiv.className = 'sources';
+                
+                const sourcesTitle = document.createElement('div');
+                sourcesTitle.className = 'sources-title';
+                sourcesTitle.textContent = 'Sources:';
+                sourcesDiv.appendChild(sourcesTitle);
+                
+                // Add each source as a link
+                sources.forEach(url => {
+                    if (url) {  // Only add if URL is not empty
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.target = '_blank';  // Open in new tab
+                        
+                        // Format the display text
+                        try {
+                            const urlObj = new URL(url);
+                            const displayText = urlObj.hostname + urlObj.pathname.substring(0, 15) + 
+                                               (urlObj.pathname.length > 15 ? '...' : '');
+                            link.textContent = displayText;
+                        } catch (e) {
+                            link.textContent = url.substring(0, 30) + (url.length > 30 ? '...' : '');
+                        }
+                        
+                        sourcesDiv.appendChild(link);
+                    }
+                });
+                
+                messageDiv.appendChild(sourcesDiv);
+            }
             
             messages.appendChild(messageDiv);
             scrollToBottom();
@@ -337,6 +398,5 @@
             const messages = document.getElementById('messages');
             messages.scrollTop = messages.scrollHeight;
         }
-    </script>
-</body>
+    </script></body>
 </html>
