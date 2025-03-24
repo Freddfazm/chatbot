@@ -56,27 +56,50 @@
             addMessage(question, 'user');
             questionInput.value = '';
 
-            // Get answer from API
-            const response = await fetch('/ask', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ text: question })
-            });
-
-            const result = await response.json();
-            addMessage(result.answer, 'bot');
+            try {
+                // Add a loading message
+                const loadingId = Date.now();
+                addMessage("Thinking...", 'bot', loadingId);
+                
+                console.log("Sending request to /ask with:", question);
+                
+                // Get answer from API
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: question })
+                });
+                
+                console.log("Response status:", response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`API responded with status ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log("Response data:", result);
+                
+                // Remove loading message if it exists
+                const loadingMsg = document.getElementById(`msg-${loadingId}`);
+                if (loadingMsg) loadingMsg.remove();
+                
+                addMessage(result.answer, 'bot');
+            } catch (error) {
+                console.error("Error:", error);
+                addMessage("Sorry, there was an error processing your request.", 'bot');
+            }
         }
 
-        function addMessage(text, sender) {
+        function addMessage(text, sender, id) {
             const messages = document.getElementById('messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}-message`;
+            if (id) messageDiv.id = `msg-${id}`;
             messageDiv.textContent = text;
             messages.appendChild(messageDiv);
             messages.scrollTop = messages.scrollHeight;
-        }
-    </script>
+        }    </script>
 </body>
 </html>
