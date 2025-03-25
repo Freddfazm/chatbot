@@ -1,10 +1,116 @@
-<!-- Add this button after your update button -->
-<button id="clearBtn" onclick="clearKnowledgeBase()" style="background-color: #e74c3c; margin-left: 10px;">
-    Clear Knowledge Base
-</button>
+<!-- Add to your existing CSS -->
+<style>
+    .button-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        font-weight: 500;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    
+    .btn:hover {
+        opacity: 0.85;
+    }
+    
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .btn-update {
+        background-color: #3498db;
+    }
+    
+    .btn-refresh {
+        background-color: #27ae60;
+    }
+    
+    .btn-clear {
+        background-color: #e74c3c;
+    }
+    
+    .action-description {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+    }
+</style>
 
+<!-- Replace your buttons with these styled versions -->
+<div class="button-container">
+    <div>
+        <button id="updateBtn" onclick="updateKnowledgeBase()" class="btn btn-update">
+            Update Knowledge Base
+        </button>
+        <div class="action-description">Adds new content without clearing existing data</div>
+    </div>
+    
+    <div>
+        <button id="refreshBtn" onclick="refreshKnowledgeBase()" class="btn btn-refresh">
+            Refresh Knowledge Base
+        </button>
+        <div class="action-description">Clears database and adds fresh content</div>
+    </div>
+    
+    <div>
+        <button id="clearBtn" onclick="clearKnowledgeBase()" class="btn btn-clear">
+            Clear Knowledge Base
+        </button>
+        <div class="action-description">Removes all content from database</div>
+    </div>
+</div>
 <!-- Add this function to your script section -->
 <script>
+    async function refreshKnowledgeBase() {
+        if (!confirm("This will completely refresh your knowledge base by clearing all existing data and fetching new content from Confluence. Continue?")) {
+            return;
+        }
+        
+        const statusDiv = document.getElementById('status');
+        const refreshBtn = document.getElementById('refreshBtn');
+        
+        // Show refresh status
+        statusDiv.className = '';
+        statusDiv.style.display = 'block';
+        statusDiv.textContent = 'Refreshing knowledge base... This may take a few minutes.';
+        refreshBtn.disabled = true;
+        
+        try {
+            // Get admin key
+            const adminKey = prompt("Enter admin key to confirm:");
+            
+            const response = await fetch('/refresh-kb', {
+                method: 'POST',
+                headers: {
+                    'X-Admin-Key': adminKey
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                statusDiv.className = 'success';
+                statusDiv.textContent = result.message;
+            } else {
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'Error: ' + (result.error || 'Unknown error');
+            }
+        } catch (error) {
+            statusDiv.className = 'error';
+            statusDiv.textContent = 'Error: ' + error.message;
+        } finally {
+            refreshBtn.disabled = false;
+        }
+    }
+
     async function clearKnowledgeBase() {
         if (!confirm("WARNING: This will completely delete all documents in your knowledge base. This action cannot be undone. Continue?")) {
             return;
