@@ -38,11 +38,6 @@ def ask():
 def clear_knowledge_base():
     """Completely clear the knowledge base"""
     try:
-        # Check for admin key (for security)
-        admin_key = request.headers.get('X-Admin-Key')
-        if admin_key != os.environ.get('ADMIN_SECRET_KEY'):
-            return jsonify({"error": "Unauthorized"}), 401
-            
         # Call the clear method
         result = qa_system.clear_knowledge_base()
         
@@ -59,16 +54,10 @@ def clear_knowledge_base():
     except Exception as e:
         print(f"Error clearing knowledge base: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
 @app.route('/refresh-kb', methods=['POST'])
 def refresh_knowledge_base():
     """Completely refresh the knowledge base by clearing it and adding new content"""
     try:
-        # Check for admin key (for security)
-        admin_key = request.headers.get('X-Admin-Key')
-        if admin_key != os.environ.get('ADMIN_SECRET_KEY'):
-            return jsonify({"error": "Unauthorized"}), 401
-            
         # Step 1: Clear the existing knowledge base
         clear_result = qa_system.clear_knowledge_base()
         if not clear_result["success"]:
@@ -98,7 +87,6 @@ def refresh_knowledge_base():
     except Exception as e:
         print(f"Error refreshing knowledge base: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
 @app.route('/admin')
 def admin():
     # Optional: Add basic authentication here for security

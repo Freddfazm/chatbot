@@ -1,74 +1,99 @@
 <!-- Add to your existing CSS -->
 <style>
-    .button-container {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f7fa;
     }
-    
-    .btn {
-        padding: 12px 20px;
-        border: none;
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+        color: #2c3e50;
+    }
+    button {
+        padding: 10px 15px;
         border-radius: 4px;
-        color: white;
-        font-weight: 500;
         cursor: pointer;
-        transition: opacity 0.2s;
+        font-size: 16px;
+        margin-right: 10px;
+        border: none;
+        color: white;
     }
-    
-    .btn:hover {
-        opacity: 0.85;
-    }
-    
-    .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    
-    .btn-update {
+    #updateBtn {
         background-color: #3498db;
     }
-    
-    .btn-refresh {
+    #refreshBtn {
         background-color: #27ae60;
     }
-    
-    .btn-clear {
+    #clearBtn {
         background-color: #e74c3c;
     }
-    
-    .action-description {
-        font-size: 14px;
-        color: #666;
-        margin-top: 5px;
+    #status {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 4px;
+        display: none;
+    }
+    .success {
+        background-color: #dff0d8;
+        color: #3c763d;
+    }
+    .error {
+        background-color: #f2dede;
+        color: #a94442;
     }
 </style>
 
 <!-- Replace your buttons with these styled versions -->
-<div class="button-container">
-    <div>
-        <button id="updateBtn" onclick="updateKnowledgeBase()" class="btn btn-update">
-            Update Knowledge Base
-        </button>
-        <div class="action-description">Adds new content without clearing existing data</div>
-    </div>
-    
-    <div>
-        <button id="refreshBtn" onclick="refreshKnowledgeBase()" class="btn btn-refresh">
-            Refresh Knowledge Base
-        </button>
-        <div class="action-description">Clears database and adds fresh content</div>
-    </div>
-    
-    <div>
-        <button id="clearBtn" onclick="clearKnowledgeBase()" class="btn btn-clear">
-            Clear Knowledge Base
-        </button>
-        <div class="action-description">Removes all content from database</div>
-    </div>
+<div>
+    <button id="updateBtn" onclick="updateKnowledgeBase()">Update Knowledge Base</button>
+    <button id="refreshBtn" onclick="refreshKnowledgeBase()">Refresh Knowledge Base</button>
+    <button id="clearBtn" onclick="clearKnowledgeBase()">Clear Knowledge Base</button>
 </div>
+
+<!-- Make sure this status div exists -->
+<div id="status"></div>
+
 <!-- Add this function to your script section -->
 <script>
+    async function updateKnowledgeBase() {
+        const statusDiv = document.getElementById('status');
+        const updateBtn = document.getElementById('updateBtn');
+        
+        statusDiv.className = '';
+        statusDiv.style.display = 'block';
+        statusDiv.textContent = 'Updating knowledge base... This may take a few minutes.';
+        updateBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/update-kb', {
+                method: 'POST'
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                statusDiv.className = 'success';
+                statusDiv.textContent = result.message;
+            } else {
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'Error: ' + (result.error || 'Unknown error');
+            }
+        } catch (error) {
+            statusDiv.className = 'error';
+            statusDiv.textContent = 'Error: ' + error.message;
+        } finally {
+            updateBtn.disabled = false;
+        }
+    }
+
     async function refreshKnowledgeBase() {
         if (!confirm("This will completely refresh your knowledge base by clearing all existing data and fetching new content from Confluence. Continue?")) {
             return;
@@ -77,21 +102,14 @@
         const statusDiv = document.getElementById('status');
         const refreshBtn = document.getElementById('refreshBtn');
         
-        // Show refresh status
         statusDiv.className = '';
         statusDiv.style.display = 'block';
         statusDiv.textContent = 'Refreshing knowledge base... This may take a few minutes.';
         refreshBtn.disabled = true;
         
         try {
-            // Get admin key
-            const adminKey = prompt("Enter admin key to confirm:");
-            
             const response = await fetch('/refresh-kb', {
-                method: 'POST',
-                headers: {
-                    'X-Admin-Key': adminKey
-                }
+                method: 'POST'
             });
             
             const result = await response.json();
@@ -119,21 +137,14 @@
         const statusDiv = document.getElementById('status');
         const clearBtn = document.getElementById('clearBtn');
         
-        // Show clearing status
         statusDiv.className = '';
         statusDiv.style.display = 'block';
         statusDiv.textContent = 'Clearing knowledge base...';
         clearBtn.disabled = true;
         
         try {
-            // Get your admin key from somewhere secure
-            const adminKey = prompt("Enter admin key to confirm:");
-            
             const response = await fetch('/clear-kb', {
-                method: 'POST',
-                headers: {
-                    'X-Admin-Key': adminKey
-                }
+                method: 'POST'
             });
             
             const result = await response.json();
