@@ -108,16 +108,30 @@ class QASystem:
         Completely clear all documents from the knowledge base.
         """
         try:
-            # Delete all documents from the collection
-            self.collection.delete(where={})
-            doc_count = self.collection.count()
-            return {
-                "success": True,
-                "message": f"Knowledge base cleared. Collection now has {doc_count} documents."
-            }
+            # Get current document count
+            before_count = self.collection.count()
+            
+            # Get all document IDs
+            result = self.collection.get()
+            if result and 'ids' in result and result['ids']:
+                # Delete all documents by their IDs
+                self.collection.delete(ids=result['ids'])
+                
+                # Verify deletion
+                after_count = self.collection.count()
+                
+                return {
+                    "success": True,
+                    "message": f"Knowledge base cleared. Removed {before_count - after_count} documents."
+                }
+            else:
+                return {
+                    "success": True,
+                    "message": "Knowledge base is already empty."
+                }
         except Exception as e:
             print(f"Error clearing knowledge base: {str(e)}")
             return {
                 "success": False,
                 "message": f"Error clearing knowledge base: {str(e)}"
-            }
+            }            
