@@ -102,3 +102,22 @@ class QASystem:
             'answer': response.choices[0].message.content,
             'sources': [m['url'] for m in results['metadatas'][0]]
         }
+        
+    def clear_knowledge_base(self):
+        """
+        Completely clear all documents from the knowledge base.
+        """
+        try:
+            # Delete all documents from the collection
+            self.collection.delete(where={})
+            doc_count = self.collection.count()
+            return {
+                "success": True,
+                "message": f"Knowledge base cleared. Collection now has {doc_count} documents."
+            }
+        except Exception as e:
+            print(f"Error clearing knowledge base: {str(e)}")
+            return {
+                "success": False,
+                "message": f"Error clearing knowledge base: {str(e)}"
+            }

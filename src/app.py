@@ -34,6 +34,32 @@ def ask():
         print(f"Error processing request: {str(e)}")
         return jsonify({"error": str(e), "answer": "Sorry, I encountered an error processing your request."}), 500
 
+@app.route('/clear-kb', methods=['POST'])
+def clear_knowledge_base():
+    """Completely clear the knowledge base"""
+    try:
+        # Check for admin key (for security)
+        admin_key = request.headers.get('X-Admin-Key')
+        if admin_key != os.environ.get('ADMIN_SECRET_KEY'):
+            return jsonify({"error": "Unauthorized"}), 401
+            
+        # Call the clear method
+        result = qa_system.clear_knowledge_base()
+        
+        if result["success"]:
+            return jsonify({
+                "status": "success",
+                "message": result["message"]
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": result["message"]
+            }), 500
+    except Exception as e:
+        print(f"Error clearing knowledge base: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))    
     app.run(host='0.0.0.0', port=port)

@@ -1,0 +1,49 @@
+<!-- Add this button after your update button -->
+<button id="clearBtn" onclick="clearKnowledgeBase()" style="background-color: #e74c3c; margin-left: 10px;">
+    Clear Knowledge Base
+</button>
+
+<!-- Add this function to your script section -->
+<script>
+    async function clearKnowledgeBase() {
+        if (!confirm("WARNING: This will completely delete all documents in your knowledge base. This action cannot be undone. Continue?")) {
+            return;
+        }
+        
+        const statusDiv = document.getElementById('status');
+        const clearBtn = document.getElementById('clearBtn');
+        
+        // Show clearing status
+        statusDiv.className = '';
+        statusDiv.style.display = 'block';
+        statusDiv.textContent = 'Clearing knowledge base...';
+        clearBtn.disabled = true;
+        
+        try {
+            // Get your admin key from somewhere secure
+            const adminKey = prompt("Enter admin key to confirm:");
+            
+            const response = await fetch('/clear-kb', {
+                method: 'POST',
+                headers: {
+                    'X-Admin-Key': adminKey
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                statusDiv.className = 'success';
+                statusDiv.textContent = result.message;
+            } else {
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'Error: ' + (result.error || 'Unknown error');
+            }
+        } catch (error) {
+            statusDiv.className = 'error';
+            statusDiv.textContent = 'Error: ' + error.message;
+        } finally {
+            clearBtn.disabled = false;
+        }
+    }
+</script>
