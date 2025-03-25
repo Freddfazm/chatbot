@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, render_template, request
 import os
+import json
 from qa_system import QASystem
-
+from confluence_fetcher import ConfluenceFetcher
 app = Flask(__name__, template_folder='Templates')
 qa_system = QASystem()  # Initialize the QA system
 
