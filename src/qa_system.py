@@ -77,32 +77,37 @@ class QASystem:
         # DEBUG: Print first 500 chars of context
         print(f"Context preview: {context[:500]}...")
         
-        # Create prompt for GPT - modified to be more flexible
-        prompt = f"""Answer the following question based on the provided context information. 
-        Try to be helpful even if the information is not completely explicit in the context.
-        If the context provides ANY relevant information that might help answer the question, use it.
-        If you truly don't have ANY information related to the question, say "I don't have specific information about that topic."
+        # IMPROVED PROMPT: More directive and explicit
+        prompt = f"""Answer the following question based ONLY on the provided context information.
         
         Context:
         {context}
         
-        Question: {question}"""
+        Question: {question}
+        
+        Important instructions:
+        1. If the context contains ANY information related to the question, use it to provide a detailed answer.
+        2. If the context contains step-by-step instructions related to the question, include those steps in your answer.
+        3. If the context contains partial information, provide what you can based on that partial information.
+        4. ONLY say "I don't have specific information about that topic" if the context contains ABSOLUTELY NOTHING related to the question.
+        5. DO NOT make up information that isn't in the context.
+        6. Format your answer clearly, using bullet points or numbered lists if appropriate.
+        """
 
         # Get response from GPT using the new API format with the latest model
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that answers questions based on the provided context. Extract as much relevant information as possible from the context to provide detailed, accurate answers."},
+                {"role": "system", "content": "You are a helpful assistant that answers questions based ONLY on the provided context. Your job is to extract and present information from the context, not to use your general knowledge."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.3  # Lower temperature for more focused answers
+            temperature=0.2  # Lower temperature for more focused answers
         )
 
         return {
             'answer': response.choices[0].message.content,
             'sources': [m['url'] for m in results['metadatas'][0]]
-        }
-        
+        }        
     def clear_knowledge_base(self):
         """
         Completely clear all documents from the knowledge base.
