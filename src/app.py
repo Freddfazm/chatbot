@@ -158,6 +158,10 @@ def embed_code():
     """Render the page with embeddable code snippet"""
     domain = request.host_url.rstrip('/')  # Get the current domain
     return render_template('embed_code.html', domain=domain)
+@app.route('/embed')
+def embed():
+    """Render the embedded chat interface"""
+    return render_template('embed.html')
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))    
