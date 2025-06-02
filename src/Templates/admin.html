@@ -49,17 +49,56 @@
         background-color: #f2dede;
         color: #a94442;
     }
+    /* Add navigation styles */
+    .nav {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    .nav-item {
+        margin-right: 15px;
+    }
+    .nav-link {
+        color: #3498db;
+        text-decoration: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+    .nav-link:hover {
+        background-color: #eaf2f8;
+    }
 </style>
 
-<!-- Replace your buttons with these styled versions -->
-<div>
-    <button id="updateBtn" onclick="updateKnowledgeBase()">Update Knowledge Base</button>
-    <button id="refreshBtn" onclick="refreshKnowledgeBase()">Refresh Knowledge Base</button>
-    <button id="clearBtn" onclick="clearKnowledgeBase()">Clear Knowledge Base</button>
-</div>
+<!-- Add navigation menu at the top of the page -->
+<div class="container">
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/admin">Admin</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/widget">Widget</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/embed-code">Embed Widget</a>
+        </li>
+    </ul>
 
-<!-- Make sure this status div exists -->
-<div id="status"></div>
+    <h1>Knowledge Base Administration</h1>
+
+    <!-- Replace your buttons with these styled versions -->
+    <div>
+        <button id="updateBtn" onclick="updateKnowledgeBase()">Update Knowledge Base</button>
+        <button id="refreshBtn" onclick="refreshKnowledgeBase()">Refresh Knowledge Base</button>
+        <button id="clearBtn" onclick="clearKnowledgeBase()">Clear Knowledge Base</button>
+    </div>
+
+    <!-- Make sure this status div exists -->
+    <div id="status"></div>
+</div>
 
 <!-- Add this function to your script section -->
 <script>
@@ -163,4 +202,5 @@
             clearBtn.disabled = false;
         }
     }
+</script>
 </script>

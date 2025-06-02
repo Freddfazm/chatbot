@@ -1,0 +1,105 @@
+{% extends "base.html" %}  <!-- Use your actual base template name -->
+
+{% block content %}
+<div class="container">
+    <h1>Embed AI Chatbot on Your Website</h1>
+    <p>Copy and paste the following code snippet into your website to embed the AI chatbot:</p>
+    
+    <div class="code-container">
+        <pre><code id="embed-code"><script 
+  src="{{ domain }}/static/js/widget.js" 
+  data-position="right" 
+  data-color="#4a69bd" 
+  data-domain="{{ domain }}"
+></script></code></pre>
+        <button id="copy-button" class="btn btn-primary">Copy Code</button>
+    </div>
+    
+    <div class="preview-container">
+        <h2>Preview</h2>
+        <p>This is how the chatbot will appear on your website:</p>
+        <div class="preview-frame">
+            <div class="preview-button">💬</div>
+        </div>
+    </div>
+    
+    <div class="customization-options">
+        <h2>Customization Options</h2>
+        <p>You can customize the appearance of your chatbot by modifying these attributes:</p>
+        <ul>
+            <li><code>data-position="left"</code> - Position the widget on the left side</li>
+            <li><code>data-color="#ff0000"</code> - Change the button color</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    .code-container {
+        background-color: #f5f5f5;
+        border-radius: 5px;
+        padding: 15px;
+        margin: 20px 0;
+        position: relative;
+    }
+    
+    .code-container pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+    
+    #copy-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .preview-container {
+        margin: 30px 0;
+    }
+    
+    .preview-frame {
+        border: 1px dashed #ccc;
+        padding: 20px;
+        height: 300px;
+        position: relative;
+    }
+    
+    .preview-button {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #4a69bd;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .customization-options {
+        margin: 30px 0;
+    }
+</style>
+
+<script>
+    document.getElementById('copy-button').addEventListener('click', function() {
+        const codeElement = document.getElementById('embed-code');
+        const range = document.createRange();
+        range.selectNode(codeElement);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+        window.getSelection().removeAllRanges();
+        
+        this.textContent = 'Copied!';
+        setTimeout(() => {
+            this.textContent = 'Copy Code';
+        }, 2000);
+    });
+</script>
+{% endblock %}

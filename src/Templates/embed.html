@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .chat-widget {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+        }
+        
+        .chat-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 16px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .chat-header h3 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .chat-header-dot {
+            height: 10px;
+            width: 10px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            scroll-behavior: smooth;
+        }
+        
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        .message {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            position: relative;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background-color: #3498db;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+            align-self: flex-end;
+        }
+        
+        .bot-message {
+            background-color: #fff;
+            color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            align-self: flex-start;
+        }
+        
+        .timestamp {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 6px;
+            text-align: right;
+        }
+        
+        .bot-message .timestamp {
+            color: #999;
+        }
+        
+        .chat-input {
+            padding: 16px;
+            background-color: #fff;
+            border-top: 1px solid #eaeaea;
+            display: flex;
+            align-items: center;
+        }
+        
+        #question {
+            flex: 1;
+            border: none;
+            background-color: #f1f3f4;
+            border-radius: 24px;
+            padding: 12px 16px;
+            font-size: 14px;
+            outline: none;
+            transition: background-color 0.3s;
+        }
+        
+        #question:focus {
+            background-color: #e8eaed;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        /* Typing indicator animation */
+        .typing-indicator {
+            display: flex;
+            padding: 8px 16px;
+            background: #fff;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            width: fit-content;
+            align-self: flex-start;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 1px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.7); opacity: 0.5; }
+            50% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Add a welcome message */
+        .welcome-message {
+            text-align: center;
+            color: #888;
+            margin: 20px 0;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        /* Sources styles */
+        .sources {
+            margin-top: 8px;
+            font-size: 12px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            padding-top: 8px;
+        }
+        
+        .sources a {
+            color: #2980b9;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 4px;
+            word-break: break-all;
+            transition: color 0.2s;
+        }
+        
+        .sources a:hover {
+            color: #3498db;
+            text-decoration: underline;
+        }
+        
+        .sources-title {
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-widget">
+        <div class="chat-header">
+            <h3><span class="chat-header-dot"></span>Knowledge Assistant</h3>
+        </div>
+        <div class="chat-messages" id="messages">
+            <div class="welcome-message">
+                Welcome to the Knowledge Assistant.<br>Ask me anything about our resources!
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="question" placeholder="Type your question..." onkeypress="handleKeyPress(event)">
+            <button onclick="askQuestion()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Add this to handle Enter key press
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                askQuestion();
+            }
+        }
+        
+        async function askQuestion() {
+            const questionInput = document.getElementById('question');
+            const question = questionInput.value.trim();
+            
+            if (!question) return;
+
+            // Add user message
+            addMessage(question, 'user');
+            questionInput.value = '';
+            
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator';
+            typingIndicator.id = 'typing-indicator';
+            typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+            document.getElementById('messages').appendChild(typingIndicator);
+            scrollToBottom();
+
+            try {
+                // Get answer from API - using the correct endpoint
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: question })
+                });
+
+                // Remove typing indicator
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) indicator.remove();
+
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+
+                const result = await response.json();
+                addMessage(result.answer, 'bot', result.sources);
+            } catch (error) {
+                console.error("Error:", error);
+                
+                // Remove typing indicator
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) indicator.remove();
+                
+                addMessage("Sorry, I couldn't process your request at the moment.", 'bot');
+            }
+        }
+
+        function addMessage(text, sender, sources = null) {
+            const messages = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            // Create a container for the formatted message text
+            const textContainer = document.createElement('div');
+            textContainer.className = 'message-text';
+            
+            // Format text for better readability
+            if (sender === 'bot') {
+                let formattedText = text;
+                
+                // Check if text contains numbered steps
+                if (/\d+\.\s+/.test(formattedText)) {
+                    // Add spans around step numbers for better styling without creating an ordered list
+                    formattedText = formattedText.replace(/(\d+)\.(\s+)(\*\*[^:]+:\*\*|[^:]+:)/g, 
+                        '<div class="step-item"><span class="step-number">$1.</span>$2<span class="step-title">$3</span>');
+                    
+                    // Close the step-item divs
+                    formattedText = formattedText.replace(/(?=\d+\.\s+|$)/g, '</div>');
+                    
+                    // Wrap in a container
+                    formattedText = '<div class="steps-container">' + formattedText + '</div>';
+                }
+                
+                // Convert markdown-style bold (**text**) to HTML bold
+                formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                // Set the formatted HTML
+                textContainer.innerHTML = formattedText;
+            } else {
+                // For user messages, keep using textContent for security
+                textContainer.textContent = text;
+            }
+            
+            messageDiv.appendChild(textContainer);
+            
+            // Add timestamp
+            const timestamp = document.createElement('div');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            messageDiv.appendChild(timestamp);
+            
+            // Add sources if available (only for bot messages)
+            if (sender === 'bot' && sources && sources.length > 0) {
+                // Add sources section
+                const sourcesDiv = document.createElement('div');
+                sourcesDiv.className = 'sources';
+                
+                const sourcesTitle = document.createElement('div');
+                sourcesTitle.className = 'sources-title';
+                sourcesTitle.textContent = 'Sources:';
+                sourcesDiv.appendChild(sourcesTitle);
+                
+                // Add each source as a link
+                sources.forEach(url => {
+                    if (url) {  // Only add if URL is not empty
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.target = '_blank';  // Open in new tab
+                        
+                        // Format the display text
+                        try {
+                            const urlObj = new URL(url);
+                            const displayText = urlObj.hostname + urlObj.pathname.substring(0, 15) + 
+                                          (urlObj.pathname.length > 15 ? '...' : '');
+                            link.textContent = displayText;
+                        } catch (e) {
+                            link.textContent = url.substring(0, 30) + (url.length > 30 ? '...' : '');
+                        }
+                        
+                        sourcesDiv.appendChild(link);
+                    }
+                });
+                
+                messageDiv.appendChild(sourcesDiv);
+            }
+            
+            messages.appendChild(messageDiv);
+            scrollToBottom();
+        }        
+        
+        function scrollToBottom() {
+            const messages = document.getElementById('messages');
+            messages.scrollTop = messages.scrollHeight;
+        }
+    </script>
+</body>
+</html>

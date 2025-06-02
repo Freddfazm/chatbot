@@ -3,7 +3,10 @@ import os
 import json
 from qa_system import QASystem
 from confluence_fetcher import ConfluenceFetcher
+from flask_cors import CORS  # Add this import at the top
+
 app = Flask(__name__, template_folder='Templates')
+CORS(app, resources={r"/ask": {"origins": "*"}, r"/api/chat": {"origins": "*"}})  # Add CORS support
 qa_system = QASystem()  # Initialize the QA system
 
 @app.route('/')
@@ -152,4 +155,5 @@ def add_content_to_chroma(content, collection):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))    
+    app.run(host='0.0.0.0', port=port)
     app.run(host='0.0.0.0', port=port)
