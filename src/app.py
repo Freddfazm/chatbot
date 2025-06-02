@@ -153,7 +153,12 @@ def add_content_to_chroma(content, collection):
         
     return count
 
+@app.route('/embed-code')
+def embed_code():
+    """Render the page with embeddable code snippet"""
+    domain = request.host_url.rstrip('/')  # Get the current domain
+    return render_template('embed_code.html', domain=domain)
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))    
-    app.run(host='0.0.0.0', port=port)
     app.run(host='0.0.0.0', port=port)
