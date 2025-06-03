@@ -177,17 +177,15 @@ def add_content_to_chroma(content, collection):
         )
         
     return count
-
 @app.route('/embed-code')
-def embed_code():
-    """Render the page with embeddable code snippet"""
-    domain = request.host_url.rstrip('/')  # Get the current domain
-    return render_template('embed_code.html', domain=domain)
+def get_embed_code():  # Changed function name from embed_code to get_embed_code
+      """Render the page with embeddable code snippet"""
+      domain = request.host_url.rstrip('/')  # Get the current domain
+      return render_template('embed_code.html', domain=domain)
 @app.route('/embed')
 def embed():
-    """Render the embedded chat interface"""
-    return render_template('embed.html')
-
+      """Render the embedded chat interface"""
+      return render_template('embed.html')
 @app.route('/rebuild-kb', methods=['POST'])
 def rebuild_knowledge_base():
     """Rebuild the knowledge base by recreating the collection and adding content"""
