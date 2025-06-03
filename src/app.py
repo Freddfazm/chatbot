@@ -31,8 +31,8 @@ def home():
 def widget():
     return render_template('widget.html')
 
-@app.route('/embed')
-def embedded_chat():  # Changed function name from embed to embedded_chat
+@app.route('/embedded')
+def embedded_chat():
     """Render the embedded chat interface"""
     return render_template('embed.html')
 
@@ -274,5 +274,4 @@ def add_content_to_chroma_improved(content, collection):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
     app.run(host='0.0.0.0', port=port)
