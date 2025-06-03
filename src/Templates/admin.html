@@ -94,6 +94,8 @@
         <button id="updateBtn" onclick="updateKnowledgeBase()">Update Knowledge Base</button>
         <button id="refreshBtn" onclick="refreshKnowledgeBase()">Refresh Knowledge Base</button>
         <button id="clearBtn" onclick="clearKnowledgeBase()">Clear Knowledge Base</button>
+        <!-- Add this button to your existing buttons -->
+        <button id="rebuildBtn" onclick="rebuildKnowledgeBase()" style="background-color: #9b59b6;">Rebuild Knowledge Base</button>
     </div>
 
     <!-- Make sure this status div exists -->
@@ -102,7 +104,41 @@
 
 <!-- Add this function to your script section -->
 <script>
-    async function updateKnowledgeBase() {
+    async function rebuildKnowledgeBase() {
+        if (!confirm("WARNING: This will completely rebuild your knowledge base by recreating the collection. This action cannot be undone. Continue?")) {
+            return;
+        }
+        
+        const statusDiv = document.getElementById('status');
+        const rebuildBtn = document.getElementById('rebuildBtn');
+        
+        statusDiv.className = '';
+        statusDiv.style.display = 'block';
+        statusDiv.textContent = 'Rebuilding knowledge base... This may take a few minutes.';
+        rebuildBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/rebuild-kb', {
+                method: 'POST'
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                statusDiv.className = 'success';
+                statusDiv.textContent = result.message;
+            } else {
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'Error: ' + (result.error || 'Unknown error');
+            }
+        } catch (error) {
+            statusDiv.className = 'error';
+            statusDiv.textContent = 'Error: ' + error.message;
+        } finally {
+            rebuildBtn.disabled = false;
+        }
+    }
+</script>    async function updateKnowledgeBase() {
         const statusDiv = document.getElementById('status');
         const updateBtn = document.getElementById('updateBtn');
         

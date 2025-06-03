@@ -163,6 +163,98 @@ def embed():
     """Render the embedded chat interface"""
     return render_template('embed.html')
 
+@app.route('/rebuild-kb', methods=['POST'])
+def rebuild_knowledge_base():
+    """Rebuild the knowledge base by recreating the collection and adding content"""
+    try:
+        # Step 1: Delete the existing collection
+        try:
+            qa_system.chroma_client.delete_collection(name="confluence_kb")
+            print("Deleted existing collection")
+        except Exception as e:
+            print(f"Error deleting collection: {str(e)}")
+        
+        # Step 2: Create a new collection
+        qa_system.collection = qa_system.chroma_client.create_collection(
+            name="confluence_kb",
+            embedding_function=qa_system.openai_ef
+        )
+        print("Created new collection")
+        
+        # Step 3: Fetch content from Confluence
+        fetcher = ConfluenceFetcher()
+        pages = fetcher.get_all_pages()
+        content = fetcher.extract_content(pages)
+        
+        # Step 4: Save to JSON file
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        json_path = os.path.join(base_dir, 'confluence_content.json')
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(content, f, ensure_ascii=False, indent=4)
+        
+        # Step 5: Add content to the vector database with improved error handling
+        added_count = add_content_to_chroma_improved(content, qa_system.collection)
+        
+        return jsonify({
+            "status": "success",
+            "message": f"Knowledge base rebuilt successfully. Added {added_count} documents."
+        })
+    except Exception as e:
+        print(f"Error rebuilding knowledge base: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+def add_content_to_chroma_improved(content, collection):
+    """Add content to ChromaDB collection with improved error handling"""
+    # Prepare documents for batch insertion
+    documents = []
+    metadatas = []
+    ids = []
+    
+    # Process each content item
+    count = 0
+    for item in content:
+        if 'title' in item and 'content' in item and 'url' in item:
+            # Validate content is not None or empty
+            if item['content'] is None or item['content'].strip() == '':
+                print(f"Skipping item with empty content: {item['title']}")
+                continue
+                
+            # Create a document with title and content
+            doc = f"Title: {item['title']}\n\n{item['content']}"
+            
+            # Validate document
+            if doc and len(doc.strip()) > 10:  # Ensure document has meaningful content
+                # Add to batches
+                documents.append(doc)
+                metadatas.append({"url": item['url'], "title": item['title']})
+                ids.append(f"doc_{count}")
+                
+                count += 1
+                print(f"Added document {count}: {item['title'][:50]}...")
+            else:
+                print(f"Skipping document with insufficient content: {item['title']}")
+    
+    # Add documents to collection in batches
+    if documents:
+        try:
+            print(f"Adding {len(documents)} documents to collection")
+            collection.add(
+                documents=documents,
+                metadatas=metadatas,
+                ids=ids
+            )
+            print("Documents added successfully")
+        except Exception as e:
+            print(f"Error adding documents to collection: {str(e)}")
+            import traceback
+            traceback.print_exc()
+    else:
+        print("No valid documents to add")
+        
+    return count
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))    
     app.run(host='0.0.0.0', port=port)

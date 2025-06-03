@@ -66,6 +66,22 @@ class QASystem:
             # Debug print query results structure
             print(f"Query results structure: {type(results)}")
             print(f"Query results keys: {results.keys()}")
+            
+            # Print metadata for debugging
+            if 'metadatas' in results and results['metadatas'] and results['metadatas'][0]:
+                print(f"Metadata found: {len(results['metadatas'][0])}")
+                for i, metadata in enumerate(results['metadatas'][0]):
+                    print(f"Metadata {i}: {metadata}")
+            else:
+                print("No metadata found")
+                
+            # Print IDs for debugging
+            if 'ids' in results and results['ids'] and results['ids'][0]:
+                print(f"IDs found: {len(results['ids'][0])}")
+                for i, id in enumerate(results['ids'][0]):
+                    print(f"ID {i}: {id}")
+            else:
+                print("No IDs found")
         
             # Check if documents exist in results
             if 'documents' not in results or not results['documents']:
