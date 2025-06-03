@@ -32,12 +32,12 @@ def widget():
     return render_template('widget.html')
 
 @app.route('/embed')
-def embed():
+def embedded_chat():  # Changed function name from embed to embedded_chat
     """Render the embedded chat interface"""
     return render_template('embed.html')
 
 @app.route('/embed-code')
-def embed_code():
+def get_embed_code():
     """Render the embed code page"""
     domain = request.host_url.rstrip('/')
     return render_template('embed_code.html', domain=domain)
@@ -83,6 +83,7 @@ def clear_knowledge_base():
     except Exception as e:
         print(f"Error clearing knowledge base: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 @app.route('/refresh-kb', methods=['POST'])
 def refresh_knowledge_base():
     """Completely refresh the knowledge base by clearing it and adding new content"""
@@ -116,6 +117,7 @@ def refresh_knowledge_base():
     except Exception as e:
         print(f"Error refreshing knowledge base: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 @app.route('/admin')
 def admin():
     # Optional: Add basic authentication here for security
@@ -177,15 +179,7 @@ def add_content_to_chroma(content, collection):
         )
         
     return count
-@app.route('/embed-code')
-def get_embed_code():  # Changed function name from embed_code to get_embed_code
-      """Render the page with embeddable code snippet"""
-      domain = request.host_url.rstrip('/')  # Get the current domain
-      return render_template('embed_code.html', domain=domain)
-@app.route('/embed')
-def embed():
-      """Render the embedded chat interface"""
-      return render_template('embed.html')
+
 @app.route('/rebuild-kb', methods=['POST'])
 def rebuild_knowledge_base():
     """Rebuild the knowledge base by recreating the collection and adding content"""
@@ -279,5 +273,6 @@ def add_content_to_chroma_improved(content, collection):
     return count
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))    
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
     app.run(host='0.0.0.0', port=port)
