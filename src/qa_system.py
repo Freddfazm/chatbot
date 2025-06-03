@@ -71,8 +71,17 @@ class QASystem:
                 'sources': []
             }
 
-        # Prepare context from relevant chunks
-        context = "\n".join(results['documents'][0])
+        # Filter out None values and prepare context from relevant chunks
+        documents = [doc for doc in results['documents'][0] if doc is not None]
+        
+        # If all documents were None, handle that case
+        if not documents:
+            return {
+                'answer': "I couldn't find any relevant information to answer your question.",
+                'sources': []
+            }
+        
+        context = "\n".join(documents)
         
         # DEBUG: Print first 500 chars of context
         print(f"Context preview: {context[:500]}...")
@@ -104,10 +113,17 @@ class QASystem:
             temperature=0.2  # Lower temperature for more focused answers
         )
 
+        # Filter out None values from metadatas URLs as well
+        sources = []
+        if results['metadatas'] and results['metadatas'][0]:
+            for metadata in results['metadatas'][0]:
+                if metadata and 'url' in metadata and metadata['url'] is not None:
+                    sources.append(metadata['url'])
+
         return {
             'answer': response.choices[0].message.content,
-            'sources': [m['url'] for m in results['metadatas'][0]]
-        }        
+            'sources': sources
+        }    
     def clear_knowledge_base(self):
         """
         Completely clear all documents from the knowledge base.
