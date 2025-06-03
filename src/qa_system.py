@@ -27,23 +27,49 @@ class QASystem:
         self.model = "gpt-4-turbo"  # Using latest model
         print(f"Using model: {self.model}")  # Debug print
         
-        # Get the collection
+        # Get or create the collection with better error handling
+        self.collection = self._get_or_create_collection()
+
+    def _get_or_create_collection(self):
+        """Get or create the collection with better error handling"""
         try:
-            self.collection = self.chroma_client.get_collection(
+            # Try to get the collection
+            collection = self.chroma_client.get_collection(
                 name="confluence_kb",
                 embedding_function=self.openai_ef
             )
-            doc_count = self.collection.count()
-            print(f"Found collection with {doc_count} documents")  # Debug print
+            doc_count = collection.count()
+            print(f"Found collection with {doc_count} documents")
+            return collection
         except Exception as e:
             print(f"Error getting collection: {str(e)}")
-            # Create the collection if it doesn't exist
-            self.collection = self.chroma_client.create_collection(
-                name="confluence_kb",
-                embedding_function=self.openai_ef
-            )
-            print("Created new collection")
-
+            try:
+                # Try to create the collection
+                collection = self.chroma_client.create_collection(
+                    name="confluence_kb",
+                    embedding_function=self.openai_ef
+                )
+                print("Created new collection")
+                return collection
+            except Exception as create_error:
+                print(f"Error creating collection: {str(create_error)}")
+                # As a last resort, try to delete and recreate
+                try:
+                    print("Attempting to delete and recreate collection")
+                    try:
+                        self.chroma_client.delete_collection(name="confluence_kb")
+                    except:
+                        pass  # Ignore if it doesn't exist
+                    
+                    collection = self.chroma_client.create_collection(
+                        name="confluence_kb",
+                        embedding_function=self.openai_ef
+                    )
+                    print("Successfully recreated collection")
+                    return collection
+                except Exception as final_error:
+                    print(f"Fatal error creating collection: {str(final_error)}")
+                    raise
     def get_answer(self, question, n_results=5):
         # Check if collection has any documents
         doc_count = self.collection.count()

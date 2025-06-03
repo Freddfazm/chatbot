@@ -9,6 +9,17 @@ app = Flask(__name__, template_folder='Templates')
 CORS(app, resources={r"/ask": {"origins": "*"}, r"/api/chat": {"origins": "*"}})  # Add CORS support
 qa_system = QASystem()  # Initialize the QA system
 
+# Function to check and reinitialize QA system if needed
+def ensure_qa_system():
+    global qa_system
+    try:
+        # Try to access the collection to check if it's valid
+        _ = qa_system.collection.count()
+    except Exception as e:
+        print(f"QA system error, reinitializing: {str(e)}")
+        # Reinitialize the QA system
+        qa_system = QASystem()
+
 @app.route('/')
 def home():
     return jsonify({
@@ -20,9 +31,23 @@ def home():
 def widget():
     return render_template('widget.html')
 
+@app.route('/embed')
+def embed():
+    """Render the embedded chat interface"""
+    return render_template('embed.html')
+
+@app.route('/embed-code')
+def embed_code():
+    """Render the embed code page"""
+    domain = request.host_url.rstrip('/')
+    return render_template('embed_code.html', domain=domain)
+
 @app.route('/ask', methods=['POST'])
 def ask():
     try:
+        # Ensure QA system is initialized
+        ensure_qa_system()
+        
         data = request.json
         if not data or 'text' not in data:
             return jsonify({"error": "Missing 'text' field"}), 400
