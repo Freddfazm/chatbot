@@ -7,7 +7,10 @@ from flask_cors import CORS  # Add this import at the top
 
 app = Flask(__name__, template_folder='Templates')
 CORS(app, resources={r"/ask": {"origins": "*"}, r"/api/chat": {"origins": "*"}})  # Add CORS support
-qa_system = QASystem()  # Initialize the QA system
+
+# Initialize the QA system with auto-rebuild enabled
+excluded_labels = ['internal', 'mls-team']  # Define labels to exclude
+qa_system = QASystem(excluded_labels=excluded_labels, auto_rebuild=True)  # Initialize with auto-rebuild
 
 # Function to check and reinitialize QA system if needed
 def ensure_qa_system():
@@ -18,7 +21,7 @@ def ensure_qa_system():
     except Exception as e:
         print(f"QA system error, reinitializing: {str(e)}")
         # Reinitialize the QA system
-        qa_system = QASystem()
+        qa_system = QASystem(excluded_labels=excluded_labels)
 
 @app.route('/')
 def home():
