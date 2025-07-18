@@ -258,7 +258,6 @@
             <button class="close-button" id="close-button">✕</button>
         </div>
         <div class="chat-messages" id="messages">
-            <div class="welcome-message">
                 Welcome to the Knowledge Assistant.<br>Ask me anything about our resources!
             </div>
         </div>
@@ -417,6 +416,22 @@
             const messages = document.getElementById('messages');
             messages.scrollTop = messages.scrollHeight;
         }
+        // Add close button functionality
+document.getElementById('close-button').addEventListener('click', function() {
+    // Option 1: If this is in an iframe, send message to parent window
+    if (window.parent !== window) {
+        window.parent.postMessage('close-chat', '*');
+    }
+    
+    // Option 2: Hide the chat widget directly
+    document.querySelector('.chat-widget').style.display = 'none';
+    
+    // Option 3: If there's a parent container that should be hidden
+    const parentContainer = window.frameElement;
+    if (parentContainer) {
+        parentContainer.style.display = 'none';
+    }
+});
     </script>
 </body>
 </html>
