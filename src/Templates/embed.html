@@ -420,12 +420,12 @@
         
         // Add close button functionality
         document.getElementById('close-button').addEventListener('click', function() {
-            // Hide the entire body to remove any remaining container
-            document.body.style.display = 'none';
-            
-            // Or communicate with parent window if embedded in iframe
+            // Communicate with parent window to hide the iframe
             if (window.parent !== window) {
-                window.parent.postMessage('closeWidget', '*');
+                window.parent.postMessage({type: 'closeWidget'}, '*');
+            } else {
+                // Fallback if not in iframe
+                document.body.style.display = 'none';
             }
         });
         
