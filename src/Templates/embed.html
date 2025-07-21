@@ -420,8 +420,8 @@
         
         // Add close button functionality
         document.getElementById('close-button').addEventListener('click', function() {
-            // Hide the widget
-            document.querySelector('.chat-widget').style.display = 'none';
+            // Hide the entire body to remove any remaining container
+            document.body.style.display = 'none';
             
             // Or communicate with parent window if embedded in iframe
             if (window.parent !== window) {
